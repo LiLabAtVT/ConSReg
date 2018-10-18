@@ -207,6 +207,7 @@ def imp_score(feature_mat, n_resampling=200, verbose = 0, fold = 10, n_jobs = 1)
     # format result
     # ranks = np.concatenate([coef, feature_scores],axis=1)
     ranks = pd.DataFrame(feature_scores, columns = ["scores"], index = feature_names)
+    ranks = ranks.sort_values(by = "scores",ascending = False)
 
     return(ranks)
     
