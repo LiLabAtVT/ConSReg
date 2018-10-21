@@ -1,0 +1,16 @@
+Metadata-Version: 2.1
+Name: ConSReg
+Version: 1.0.1
+Summary: condition-specific regulation
+Home-page: https://github.com/LiLabAtVT/ConSReg
+Author: Qi Song
+Author-email: alexsong@vt.edu
+License: MIT
+Description: # ConSReg
+        
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 2
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=2.7
+Description-Content-Type: text/markdown
