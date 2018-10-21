@@ -10,7 +10,8 @@ ConSReg can be installed from pip:
 pip install --user ConSReg
 ```
 ### 1.2 R installation
-ConSReg requires several R packages: `ChIPseeker`, `CoReg` and `gglasso`
+ConSReg requires several R packages: `ChIPseeker`, `CoReg` and `gglasso`.
+
 To install `ChIPSeeker` from bioconductor, type the following commands in R environment:
 ```R
 source("https://bioconductor.org/biocLite.R")
