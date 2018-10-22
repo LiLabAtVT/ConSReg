@@ -4,7 +4,6 @@ Combine peaks files in a folder
 
 # Author: (Alex) Qi Song <alexsong@vt.edu>
 
-#import os
 import re
 import pandas as pd
 from numpy import array

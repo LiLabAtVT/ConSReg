@@ -13,4 +13,5 @@ ConSReg/utils.py
 ConSReg.egg-info/PKG-INFO
 ConSReg.egg-info/SOURCES.txt
 ConSReg.egg-info/dependency_links.txt
+ConSReg.egg-info/requires.txt
 ConSReg.egg-info/top_level.txt

@@ -1,0 +1,8 @@
+numpy>=1.9.0
+scipy
+pandas==0.21.1
+joblib
+rpy2==2.8.6
+networkx>=2
+sklearn
+intervaltree

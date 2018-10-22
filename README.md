@@ -10,7 +10,7 @@ ConSReg can be installed from pip:
 pip install --user ConSReg
 ```
 ### 1.2 R installation
-ConSReg requires several R packages: `ChIPseeker`, `CoReg` and `gglasso`.
+ConSReg requires several R packages: `ChIPseeker`, `CoReg`, `gglasso` and `RRF`.
 
 To install `ChIPSeeker` from bioconductor, type the following commands in R environment:
 ```R
@@ -33,6 +33,12 @@ To install `gglasso` package from CRAN, type the following commands in R environ
 install.pacakges("gglasso")
 ```
 Please refer to the link [here](https://cran.r-project.org/web/packages/gglasso/index.html) for more details.
+
+To install `RRF` package from CRAN, type the following commands in R environment:
+```R
+install.pacakges("RRF")
+```
+Please refer to the link [here](https://cran.r-project.org/web/packages/RRF/index.html) for more details.
 
 ## 2. Sample datasets
 Sample datasets can be found in `data` folder.

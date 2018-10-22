@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="ConSReg",
-    version="1.0.5",
+    version="1.0.0",
     author="Qi Song",
     author_email="alexsong@vt.edu",
     description="condition-specific regulation",
@@ -16,15 +16,15 @@ setuptools.setup(
     python_requires='>=2.7',
     packages=setuptools.find_packages(),
     install_requires=[
-        'numpy>=1.9.0',
+        'numpy',
         'scipy',
-        'pandas==0.21.1',
+        'pandas',
         'joblib',
-        'rpy2==2.8.6',
+        'rpy2',
         'networkx>=2',
         'sklearn',
         'intervaltree'
-    ],
+    ]
     classifiers=[
         "Programming Language :: Python :: 2",
         "License :: OSI Approved :: MIT License",
