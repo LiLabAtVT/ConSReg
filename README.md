@@ -5,7 +5,7 @@ Condition-specific regulations
 # Getting Started
 ## 1. Installation
 ### 1.1 Python installation
-ConSReg can be installed from pip:
+ConSReg can be installed using pip:
 ```shell
 pip install --user ConSReg
 ```
