@@ -4,12 +4,28 @@ Condition-specific regulations
 
 # Getting Started
 ## 1. Installation
-### 1.1 Python installation
+### 1.1 Required packages
+#### 1.1.1 Python
+- python = 2.7
+- numpy >= 1.9.0
+- scipy >= 1.1.0
+- pandas == 0.21.1
+- joblib >= 0.12.5
+- rpy2==2.8.6
+- networkx >= 2
+- sklearn >= 0.18.1
+- intervaltree 
+#### 1.1.2 R
+- ChIPSeeker == 1.16.1
+- CoReg == 1.0.1
+- gglasso == 1.4
+- RRF == 1.9
+### 1.2 Python installation
 ConSReg can be installed using pip:
 ```shell
 pip install --user ConSReg
 ```
-### 1.2 R installation
+### 1.3 R installation
 ConSReg requires several R packages: `ChIPseeker`, `CoReg`, `gglasso` and `RRF`.
 
 To install `ChIPSeeker` from bioconductor, type the following commands in R environment:
