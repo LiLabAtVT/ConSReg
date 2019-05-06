@@ -20,6 +20,7 @@ Condition-specific regulations
 - CoReg == 1.0.1
 - gglasso == 1.4
 - RRF == 1.9
+- R >= 3.5.1
 ### 1.2 Python installation
 ConSReg can be installed using pip:
 ```shell
