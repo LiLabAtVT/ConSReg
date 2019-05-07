@@ -117,7 +117,7 @@ class ConSReg:
     '''
     Generate feature matrices for all conditions
     '''
-    def gen_feature_mat(self, verbose = True):
+    def gen_feature_mat(self, neg_type, verbose = True):
         if self.weight_adj is None or self.TF_to_target_graph is None or self.target_to_TF_graph is None or len(self.diff_tab_list) == 0:
             print("Analysis aborted. Data is not preprocssed yet")
             return(self)
@@ -126,7 +126,7 @@ class ConSReg:
             print("Generating feature matrices...")
 
         for diff_tab in self.diff_tab_list:
-            feature_mat_up,feature_mat_down = get_all_feature_mat(diff_tab, self.TF_to_target_graph, self.target_to_TF_graph, self.weight_adj)
+            feature_mat_up,feature_mat_down = get_all_feature_mat(diff_tab, neg_type, self.TF_to_target_graph, self.target_to_TF_graph, self.weight_adj)
             self.feature_mat_list.append((feature_mat_up,feature_mat_down))
 
         if verbose:
