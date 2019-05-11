@@ -14,7 +14,7 @@ Condition-specific regulations
 - rpy2==2.8.6
 - networkx >= 2
 - sklearn >= 0.18.1
-- intervaltree 
+- intervaltree == 2.1.0
 #### 1.1.2 R
 - ChIPSeeker == 1.16.1
 - CoReg == 1.0.1

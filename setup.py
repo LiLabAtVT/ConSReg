@@ -17,13 +17,13 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=[
         'numpy>=1.9.0',
-        'scipy',
+        'scipy>=1.1.0',
         'pandas==0.21.1',
         'joblib',
         'rpy2==2.8.6',
         'networkx>=2',
-        'sklearn',
-        'intervaltree'
+        'sklearn>=0.18.1',
+        'intervaltree==2.1.0'
     ],
     classifiers=[
         "Programming Language :: Python :: 2",
