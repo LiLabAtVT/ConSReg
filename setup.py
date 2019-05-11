@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="ConSReg",
-    version="1.0.7",
+    version="1.0.8",
     author="Qi Song",
     author_email="alexsong@vt.edu",
     description="condition-specific regulation",
