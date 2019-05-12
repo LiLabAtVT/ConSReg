@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="ConSReg",
-    version="1.0.8",
+    version="1.0.9",
     author="Qi Song",
     author_email="alexsong@vt.edu",
     description="condition-specific regulation",
@@ -22,7 +22,7 @@ setuptools.setup(
         'joblib',
         'rpy2==2.8.6',
         'networkx>=2',
-        'sklearn>=0.18.1',
+        'scikit-learn>=0.18.1',
         'intervaltree==2.1.0'
     ],
     classifiers=[
