@@ -26,7 +26,7 @@ We recommend the users to create a new Python environment for ConSReg using Anac
 
 To create a new environment using conda:
 ```shell
-conda create --name consreg python=3.6 -y
+conda create --name consreg python=3.6
 ```
 Activate the new environment
 ```shell
@@ -36,6 +36,8 @@ Then ConSReg can be installed using pip:
 ```shell
 pip install --user ConSReg
 ```
+You may refer to https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html for more information about installation and usage of Anaconda.
+
 ### 1.3 R installation
 ConSReg requires several R packages: `ChIPseeker`, `CoReg`, `gglasso` and `RRF`.
 
