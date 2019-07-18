@@ -6,14 +6,14 @@ Condition-specific regulations
 ## 1. Installation
 ### 1.1 Required packages
 #### 1.1.1 Python
-- python = 2.7
-- numpy >= 1.9.0
-- scipy >= 1.1.0
+- python = 3.6
+- numpy >= 1.16.2
+- scipy == 1.1.0
 - pandas == 0.21.1
-- joblib >= 0.12.5
+- joblib >= 0.11
 - rpy2==2.8.6
 - networkx >= 2
-- sklearn >= 0.18.1
+- sklearn >= 0.19.1
 - intervaltree == 2.1.0
 #### 1.1.2 R
 - ChIPSeeker == 1.16.1
@@ -22,7 +22,17 @@ Condition-specific regulations
 - RRF == 1.9
 - R >= 3.5.1
 ### 1.2 Python installation
-ConSReg can be installed using pip:
+We recommend the users to create a new Python environment for ConSReg using Anaconda and install ConSReg in this environment. This can guarantee ConSReg work with correct dependencies. However, installing ConSReg without conda environment is also welcome.
+
+To create a new environment using conda:
+```shell
+conda create --name consreg python=3.6 -y
+```
+Activate the new environment
+```shell
+conda activate consreg
+```
+Then ConSReg can be installed using pip:
 ```shell
 pip install --user ConSReg
 ```
