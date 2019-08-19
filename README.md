@@ -40,9 +40,10 @@ You may refer to https://docs.conda.io/projects/conda/en/latest/user-guide/getti
 
 ### 1.3 R installation
 ConSReg requires several R packages: `ChIPseeker`, `CoReg`, `gglasso` and `RRF`.
+
 It is recommended to deactivate any conda environment when installing R packages, as it may add the environment-specific path which may fail the installation. If any conda environment is active, you may deactivate it by:
 ```shell
-conda deactivate environment_name
+conda deactivate
 ```
 To install `ChIPSeeker` from bioconductor, type the following commands in R (for R 3.6 or higher version):
 ```R
