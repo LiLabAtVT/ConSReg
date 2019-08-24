@@ -34,7 +34,7 @@ conda activate consreg
 ```
 Then ConSReg can be installed using pip:
 ```shell
-pip install --user ConSReg
+pip install ConSReg
 ```
 You may refer to https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html for more information about installation and usage of Anaconda.
 
