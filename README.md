@@ -43,6 +43,7 @@ In the decompressed folder, configure R by:
 ./configure prefix=path_to_install_R --enable-R-shlib
 ```
 `--prefix=` specifies a writeable directory to install R into. `--enable-R-shlib` flag was added to build R shared libraries.
+
 In the decompressed folder, compile R
 ```shell
 make
@@ -57,7 +58,11 @@ export PATH=path_to_R_bin_directory:$PATH
 ```
 Add the following line to ~/.bashrc. This is for telling rpy2 where to look for dynamic libraries.
 ```shell
-export LD_PATH/home/alexsong/R/3.6.1/lib64/R/lib
+export LD_LIBRARY_PATH=/home/alexsong/R/3.6.1/lib64/R/lib:$LD_LIBRARY_PATH
+```
+Apply the changes to environment variables `PATH` and `LD_LIBRARY_PATH`:
+```shell
+source ~/.bashrc
 ```
 #### 1.2.2 install R packages
 ConSReg requires several R packages: `ChIPseeker`, `CoReg`, `gglasso` and `RRF`.
