@@ -6,11 +6,11 @@ Functions for ranking features by stability selection
 
 from joblib import Parallel, delayed
 from sklearn.model_selection import KFold
-from .train_test import train_and_val
+from ConSReg.train_test import train_and_val
 
 from rpy2.robjects.packages import importr # Function for loading R library
 from rpy2.robjects import numpy2ri
-from .utils import get_max_abs
+from ConSReg.utils import get_max_abs
 
 import numpy as np
 import pandas as pd

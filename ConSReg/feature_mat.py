@@ -151,7 +151,9 @@ def gen_feature_mat(diff_tab, target_to_TF_graph, weight_adj, DEGs, neg_genes, D
     
     Returns
     -------
-    feature_mat : a pandas datarame. feature matrix
+    feature_mat_dap : a pandas datarame, dap-seq feature matrix (with 1,0 as values)
+    feature_mat_reweight : a pandas dataframe, atac-seq reweighted feature matrix
+    feature_mat_final : a pandas datarame, final feature matrix
     '''
     
     row_genes = DEGs | neg_genes
@@ -163,15 +165,22 @@ def gen_feature_mat(diff_tab, target_to_TF_graph, weight_adj, DEGs, neg_genes, D
     else:
         adj = to_pandas_adjacency(Target2TFGraph.subgraph(row_genes | col_genes),weight = 'count').loc[row_genes,col_genes]
     fc = diff_tab.loc[col_genes,'log2FoldChange']
-    feature_mat = pd.DataFrame(adj.values * fc.values.reshape(1,fc.shape[0]),index = row_genes, columns = col_genes)
+    feature_mat_dap = adj.where(adj == 0, 1) 
+    feature_mat_reweight = adj
+    feature_mat_final = pd.DataFrame(adj.values * fc.values.reshape(1,fc.shape[0]),index = row_genes, columns = col_genes)
     
     # Re-order the featureMat
-    feature_mat = feature_mat.loc[list(DEGs)+list(neg_genes),]
+    feature_mat_dap = feature_mat_dap.loc[list(DEGs)+list(neg_genes)]
+    feature_mat_reweight = feature_mat_reweight.loc[list(DEGs)+list(neg_genes)]
+    feature_mat_final = feature_mat_final.loc[list(DEGs)+list(neg_genes),]
     
     # Add label column
-    label = pd.DataFrame(int(feature_mat.shape[0]/2)*[1] + int(feature_mat.shape[0]/2)*[0], index = feature_mat.index, columns = ['label'])
-    feature_mat = pd.concat([label, feature_mat], axis = 1)
-    return(feature_mat)
+    label = pd.DataFrame(int(feature_mat_final.shape[0]/2)*[1] + int(feature_mat_final.shape[0]/2)*[0], index = feature_mat_final.index, columns = ['label'])
+    feature_mat_dap = pd.concat([label, feature_mat_dap], axis = 1)
+    feature_mat_reweight = pd.concat([label, feature_mat_reweight], axis = 1)
+    feature_mat_final = pd.concat([label, feature_mat_final], axis = 1)
+    
+    return([feature_mat_dap, feature_mat_reweight, feature_mat_final])
 
 '''
 Get up-regulated (UR) feature matrix and down-regulated (DR) feature matrix
@@ -194,23 +203,23 @@ def get_all_feature_mat(diff_tab, neg_type, TF_to_target_graph, target_to_TF_gra
     
     Returns
     -------
-    feature_mat_up : A pandas dataframe. UR feature matrix. The first column is the class label and other columns are values for each TF(feature)
-    feature_mat_down : A pandas dataframe. DR feature matrix. The first column is the class label and other columns are values for each TF(feature)
+    feature_mat_list_up : A list of pandas dataframes, UR feature matrices (dap-seq feature matrix, reweighted feature matrix, and final feature matrix).In each matrix, the first column is the class label and other columns are values for each TF(feature)
+    feature_mat_list_down : A list of pandas dataframes, DR feature matrices (dap-seq feature matrix, reweighted feature matrix, and final feature matrix).In each matrix, the first column is the class label and other columns are values for each TF(feature)
     '''
     filter_up = filter(diff_tab,"up", neg_type, TF_to_target_graph, target_to_TF_graph)
     
     if filter_up is not None:
         DEGs_up, neg_genes_up, DEGs_TFs_up, neg_TFs_up, diff_tab_up, TF_to_target_graph_up, target_to_TF_graph_up = filter_up
-        feature_mat_up = gen_feature_mat(diff_tab_up, target_to_TF_graph_up, weight_adj, DEGs_up, neg_genes_up, DEGs_TFs_up, neg_TFs_up)
+        feature_mat_list_up = gen_feature_mat(diff_tab_up, target_to_TF_graph_up, weight_adj, DEGs_up, neg_genes_up, DEGs_TFs_up, neg_TFs_up)
     else:
-        feature_mat_up = None
+        feature_mat_list_up = None
 
     filter_down = filter(diff_tab, "down", neg_type, TF_to_target_graph, target_to_TF_graph)
     
     if filter_down is not None:
         DEGs_down, neg_genes_down, DEGs_TFs_down, neg_TFs_down, diff_tab_down, TF_to_target_graph_down, target_to_TF_graph_down = filter_down
-        feature_mat_down = gen_feature_mat(diff_tab_down, target_to_TF_graph_down, weight_adj, DEGs_down, neg_genes_down, DEGs_TFs_down, neg_TFs_down)
+        feature_mat_list_down = gen_feature_mat(diff_tab_down, target_to_TF_graph_down, weight_adj, DEGs_down, neg_genes_down, DEGs_TFs_down, neg_TFs_down)
     else:
-        feature_mat_down = None
+        feature_mat_list_down = None
 
-    return(feature_mat_up,feature_mat_down)
+    return(feature_mat_list_up,feature_mat_list_down)

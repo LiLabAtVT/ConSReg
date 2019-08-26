@@ -4,7 +4,7 @@ Finding weight for each peak.
 
 # Author: (Alex) Qi Song <alexsong@vt.edu>
 
-from .utils import bed2Int
+from ConSReg.utils import bed2Int
 from numpy import array
 
 '''

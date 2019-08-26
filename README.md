@@ -7,7 +7,7 @@ Condition-specific regulations
 ### 1.1 Required packages
 #### 1.1.1 Python
 - python = 3.6
-- numpy >= 1.16.2
+- numpy == 1.16.2
 - scipy == 1.1.0
 - pandas == 0.21.1
 - joblib >= 0.11

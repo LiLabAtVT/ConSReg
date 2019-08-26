@@ -4,17 +4,18 @@ import re
 import pickle
 
 from joblib import Parallel, delayed
-from collections import defaultdict
+from collections import defaultdict,namedtuple
 from os import path
 
-from .comb_peak_files import comb_peak_files
-from .peak_weight import get_weight
-from .edge_list import edge_list_from_peak, edge_list_to_nx_graph
-from .feature_mat import get_all_feature_mat
-from .train_test import test_by_cv
-from .imp_score import imp_score
-from .coreg import get_coreg_module
+from ConSReg.comb_peak_files import comb_peak_files
+from ConSReg.peak_weight import get_weight
+from ConSReg.edge_list import edge_list_from_peak, edge_list_to_nx_graph
+from ConSReg.feature_mat import get_all_feature_mat
+from ConSReg.train_test import test_by_cv
+from ConSReg.imp_score import imp_score
+from ConSReg.coreg import get_coreg_module
 
+feature_mat_list = namedtuple('feature_mat_list','comp_names UR_feature_mat_list DR_feature_mat_list')
 '''
 Function to read a previously saved ConSReg object
 '''
@@ -97,7 +98,9 @@ class ConSReg:
         self.__diff_tab_list = []
         
         # Modifying these attributes from outside of class is not recommended
-        self._feature_mat_list = []
+        self._feature_mat_list_final = []
+        self._feature_mat_list_dap = []
+        self._feature_mat_list_reweighted = []
         self._feature_group = []
         self._diff_name_list = []
         
@@ -111,7 +114,9 @@ class ConSReg:
         
         # Set up some flags for conveniently checking the status
         self.__preprocess = False
-        self.__feature_generated = False
+        self.__feature_final_generated = False
+        self.__feature_dap_generated = False
+        self.__feature_reweighted_generated = False
         self.__imp_generated = False
         self.__feature_group_generated = False
         self.__networks_generated = False
@@ -275,17 +280,100 @@ class ConSReg:
             print("Existing feature matrices will be overwritten.")
             print("Generating feature matrices...")
         
-        self._feature_mat_list = []
+        self._feature_mat_list_dap = []
+        self._feature_mat_list_reweight = []
+        self._feature_mat_list_final = []
+        
         for diff_tab in self.__diff_tab_list:
-            feature_mat_up,feature_mat_down = get_all_feature_mat(diff_tab, neg_type, self.__TF_to_target_graph, self.__target_to_TF_graph, self.__weight_adj)
-            self._feature_mat_list.append((feature_mat_up,feature_mat_down))
+            feature_mat_list_up,feature_mat_list_down = get_all_feature_mat(diff_tab, neg_type, self.__TF_to_target_graph, self.__target_to_TF_graph, self.__weight_adj)
+            self._feature_mat_list_dap.append((feature_mat_list_up[0],feature_mat_list_down[0]))
+            self._feature_mat_list_reweight.append((feature_mat_list_up[1],feature_mat_list_down[1]))
+            self._feature_mat_list_final.append((feature_mat_list_up[2],feature_mat_list_down[2]))
 
         if verbose:
             print("Done")
         
         # Mark the flag. Feature matrices have been generated
-        self.__feature_generated = True
+        self.__feature_final_generated = True
+        self.__feature_dap_generated = True
+        self.__feature_reweighted_generated = True
+        
         return(self)
+    
+    '''
+    Functions to extract different types of feature matrices.
+    '''
+    def get_feature_mat_dap(self):
+        '''
+        Parameters
+        ----------
+        self
+        
+        Returns
+        -------
+        self
+        '''
+        if not self.__feature_dap_generated:
+            print("Analysis aborted. Feature matrices were generated yet.")
+            
+        comp_names = []
+        ur_mat_list = []
+        dr_mat_list = []
+        for comp_name,(ur_mat,dr_mat) in zip(self._diff_name_list, self._feature_mat_list_dap):
+            comp_names.append(comp_name)
+            ur_mat_list.append(ur_mat)
+            dr_mat_list.append(dr_mat)
+        
+        to_return = feature_mat_list(comp_names, ur_mat_list, dr_mat_list)
+        return(to_return)
+            
+    def get_feature_mat_reweight(self):
+        '''
+        Parameters
+        ----------
+        self
+        
+        Returns
+        -------
+        self
+        '''
+        if not self.__feature_reweighted_generated:
+            print("Analysis aborted. Feature matrices were generated yet.")
+            
+        comp_names = []
+        ur_mat_list = []
+        dr_mat_list = []
+        for comp_name,(ur_mat,dr_mat) in zip(self._diff_name_list, self._feature_mat_list_reweight):
+            comp_names.append(comp_name)
+            ur_mat_list.append(ur_mat)
+            dr_mat_list.append(dr_mat)
+        
+        to_return = feature_mat_list(comp_names, ur_mat_list, dr_mat_list)
+        return(to_return)
+        
+    def get_feature_mat_final(self):
+        '''
+        Parameters
+        ----------
+        self
+        
+        Returns
+        -------
+        self
+        '''
+        if not self.__feature_final_generated:
+            print("Analysis aborted. Feature matrices were generated yet.")
+            
+        comp_names = []
+        ur_mat_list = []
+        dr_mat_list = []
+        for comp_name,(ur_mat,dr_mat) in zip(self._diff_name_list, self._feature_mat_list_final):
+            comp_names.append(comp_name)
+            ur_mat_list.append(ur_mat)
+            dr_mat_list.append(dr_mat)
+        
+        to_return = feature_mat_list(comp_names, ur_mat_list, dr_mat_list)
+        return(to_return)
     
     '''
     Get importance scores for each feature matrix
@@ -294,7 +382,9 @@ class ConSReg:
         '''
         Parameters
         ----------
-        feature_mat_list : a list of numpy 2d array. feature matrices
+        n_resampling : number of resampling times
+        n_jobs: number of jobs (for parallelization)
+        verbose: output detailed results or not?
 
         Returns
         -------
@@ -328,14 +418,14 @@ class ConSReg:
         imp_score_list_up = []
         imp_score_list_down = []
         
-        for (feature_mat_up, feature_mat_down) in self._feature_mat_list:
+        for (feature_mat_up, feature_mat_down) in self._feature_mat_list_final:
             if feature_mat_up is not None:
-                imp_score_up = imp_score(feature_mat_up, n_resampling = n_resampling, verbose = 0, fold = 10, n_jobs = n_jobs)
+                imp_score_up = imp_score(feature_mat_up, n_resampling = n_resampling, verbose = verbose, fold = 10, n_jobs = n_jobs)
             else:
                 imp_score_up = None
             
             if feature_mat_down is not None:
-                imp_score_down = imp_score(feature_mat_down, n_resampling = n_resampling, verbose = 0, fold = 10, n_jobs = n_jobs)
+                imp_score_down = imp_score(feature_mat_down, n_resampling = n_resampling, verbose = verbose, fold = 10, n_jobs = n_jobs)
             else:
                 imp_score_down = None
                 
@@ -345,8 +435,9 @@ class ConSReg:
         self.imp_scores_UR = pd.concat(imp_score_list_up,axis = 1).fillna(0)
         self.imp_scores_DR = pd.concat(imp_score_list_down,axis = 1).fillna(0)
         
-        self.imp_scores_UR.columns = self._diff_name_list
-        self.imp_scores_DR.columns = self._diff_name_list
+        # Only use names of contrasts that did not generate None feature matrix
+        self.imp_scores_UR.columns = [self._diff_name_list[i] for i,_ in enumerate(imp_score_list_up) if _ is not None]
+        self.imp_scores_DR.columns = [self._diff_name_list[i] for i,_ in enumerate(imp_score_list_down) if _ is not None] 
         
         if verbose:
             print("Done")
@@ -407,11 +498,8 @@ class ConSReg:
         '''
         Parameters
         ----------
-        imp_score_list : a list of pandas dataframe. a list of dataframe, each corresponds to 
-        importance scores for one condition
-
-        feature_mat_list : a list of numpy 2d array. feature matrices
         imp_cutoff : float. TFs will be selected if its importance socre > imp_cutoff
+        verbose: output detailed results or not？
 
         Returns
         -------
@@ -428,14 +516,14 @@ class ConSReg:
             raise ValueError("Argument 'verbose' should be a boolean variable")
         ################# End checking ################                     
         
-        if not self.__imp_generated or not self.__feature_generated:
+        if not self.__imp_generated or not self.__feature_final_generated:
             print("Analysis aborted. There are no importance scores/feature matrices generated yet.")
             return(self)
         
         imp_scores_UR_list = list(map(lambda x: self.imp_scores_UR.loc[:,x], self.imp_scores_UR.columns))
         imp_scores_DR_list = list(map(lambda x: self.imp_scores_DR.loc[:,x], self.imp_scores_DR.columns))
         
-        to_iter = zip(imp_scores_UR_list, imp_scores_DR_list, self._feature_mat_list)
+        to_iter = zip(imp_scores_UR_list, imp_scores_DR_list, self._feature_mat_list_final)
         
         if verbose:
             print("Existing networks will be overwritten.")
@@ -443,6 +531,8 @@ class ConSReg:
             
         self.networks_UR = []
         self.networks_DR = []
+        
+        # None feature matrix will be skipped
         for imp_score_up, imp_score_down, (feature_mat_up, feature_mat_down) in to_iter:
 
             if feature_mat_up is not None:
@@ -459,8 +549,6 @@ class ConSReg:
                 
                 # Sort edge list by TF
                 el_up.sort_values(by = "TFID",axis = 0,inplace = True)
-            else:
-                el_up = None
             
             if feature_mat_down is not None:
                 select_TF_down = imp_score_down[imp_score_down > imp_cutoff].index
@@ -471,8 +559,6 @@ class ConSReg:
                 el_down.columns = ["targetID","TFID","edge_weight"]
                 el_down = el_down.loc[(el_down.loc[:,"edge_weight"] != 0),["TFID","targetID"]]
                 el_down.sort_values(by = "TFID",axis = 0,inplace = True)
-            else:
-                el_down = None
             
             self.networks_UR.append(el_up)
             self.networks_DR.append(el_down)
@@ -529,7 +615,7 @@ class ConSReg:
             print("Performing cross-validation for each feature matrix using {} engine...".format(ml_engine))
             print("Old evaluation results will be ovewritten")
 
-        if not self.__feature_generated:
+        if not self.__feature_final_generated:
             print("Analysis aborted. There are no feature matrices generated yet.")
             return(self)
         
@@ -541,7 +627,7 @@ class ConSReg:
                 print("Analysis aborted. 'lglasso' is selected but there are no feature groups generated yet")
                 return(self)
         
-        iter_list = zip(self._diff_name_list, self.__diff_tab_list, self._feature_mat_list, self._feature_group)
+        iter_list = zip(self._diff_name_list, self.__diff_tab_list, self._feature_mat_list_final, self._feature_group)
         
         out = Parallel(n_jobs = n_jobs, verbose=15)(delayed(parallel_eval)(
                                             diff_name,

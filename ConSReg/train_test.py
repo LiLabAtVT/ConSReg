@@ -15,7 +15,7 @@ from scipy.stats import pearsonr
 from rpy2.robjects.packages import importr # This is for loading R library
 from rpy2.robjects import numpy2ri
 from rpy2.robjects import FloatVector
-from .utils import get_max_abs
+from ConSReg.utils import get_max_abs
 
 import warnings
 import numpy as np
