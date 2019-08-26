@@ -1,4 +1,4 @@
-# ConSReg
+# ConSReg 1.1.4
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 Condition-specific regulations
 
