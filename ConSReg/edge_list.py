@@ -54,7 +54,28 @@ def edge_list_from_peak(peak_tab, gff_file, upTSS = 3000, downTSS = 500):
     
     # annotate peaks
     anno_peak_tab = pandas2ri.ri2py(base.as_data_frame(meth.slot(CSK.annotatePeak(peaks,TxDb = txdb),"anno")))
-    index = (anno_peak_tab['distanceToTSS'] > -upTSS) & (anno_peak_tab['distanceToTSS'] <= downTSS)
+    
+    '''
+    Extract binding sites located in the upstream of the TSS of the nearest gene or 
+    binding sites located within upTSS bp to the upstream of the TSS of the nearest gene
+    '''
+    if upTSS is "gene":
+        up_index = anno_peak_tab['distanceToTSS'] < 0
+    else:
+        up_index = anno_peak_tab['distanceToTSS'] > -upTSS
+    
+    '''
+    Extract binding sites located in the first intron of nearest gene or
+    binding sites located within downTSS bp to the downstream of the TSS of the nearest genes
+    '''
+    if downTSS is "intron":
+        down_index = base.grepl("intron 1 of",anno_peak_tab['annotation']
+    else:
+        down_index = anno_peak_tab['distanceToTSS'] <= downTSS
+     
+        #index = index1 & index2
+    index = up_index & down_index
+        #index = (anno_peak_tab['distanceToTSS'] > -upTSS) & (anno_peak_tab['distanceToTSS'] <= downTSS) 
     
     # Make edge list
     el = anno_peak_tab.loc[index,('TFID','geneId')]

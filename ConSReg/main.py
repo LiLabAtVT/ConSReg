@@ -208,12 +208,14 @@ class ConSReg:
         # Note that repeated edges can exist because we want to keep all peaks for one TF->target interaction so as to overlap with all possible
         # open chromatin regions
         peak_tab = peak_tab.iloc[el_anno.index,]
-
-        # Generate edge list without repeated edges
-        el_nr = el_anno.groupby(el_anno.columns.tolist(), as_index = False).size()
+        el_anno = pd.concat([el_anno,peak_tab.loc[,"signalValue"]])
+        
+        # Generate edge list without repeated edges. For each TF-target interaction,sum of peak signals is recorded as edge weight.
+        # el_nr = el_anno.groupby(el_anno.columns.tolist(), as_index = False).size()
+        el_nr = el_anno.groupby(['TFID','targetID'], as_index = False).sum()
         el_nr = pd.DataFrame(el_nr.values, index = el_nr.index)
         el_nr.reset_index(inplace = True)
-        el_nr.columns = ["TFID","targetID","count"]
+        el_nr.columns = ["TFID","targetID","signal"]
         self.__dap_seq_el = el_nr.loc[:,["TFID","targetID"]]
 
         if verbose:

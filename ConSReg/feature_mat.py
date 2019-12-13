@@ -163,7 +163,7 @@ def gen_feature_mat(diff_tab, target_to_TF_graph, weight_adj, DEGs, neg_genes, D
     if weight_adj is not None:
         adj = weight_adj.loc[row_genes,col_genes]
     else:
-        adj = to_pandas_adjacency(Target2TFGraph.subgraph(row_genes | col_genes),weight = 'count').loc[row_genes,col_genes]
+        adj = to_pandas_adjacency(Target2TFGraph.subgraph(row_genes | col_genes),weight = 'signal').loc[row_genes,col_genes]
     fc = diff_tab.loc[col_genes,'log2FoldChange']
     feature_mat_dap = adj.where(adj == 0, 1) 
     feature_mat_reweight = adj
@@ -212,7 +212,7 @@ def get_all_feature_mat(diff_tab, neg_type, TF_to_target_graph, target_to_TF_gra
         DEGs_up, neg_genes_up, DEGs_TFs_up, neg_TFs_up, diff_tab_up, TF_to_target_graph_up, target_to_TF_graph_up = filter_up
         feature_mat_list_up = gen_feature_mat(diff_tab_up, target_to_TF_graph_up, weight_adj, DEGs_up, neg_genes_up, DEGs_TFs_up, neg_TFs_up)
     else:
-        feature_mat_list_up = None
+        feature_mat_list_up = [None,None,None]
 
     filter_down = filter(diff_tab, "down", neg_type, TF_to_target_graph, target_to_TF_graph)
     
@@ -220,6 +220,6 @@ def get_all_feature_mat(diff_tab, neg_type, TF_to_target_graph, target_to_TF_gra
         DEGs_down, neg_genes_down, DEGs_TFs_down, neg_TFs_down, diff_tab_down, TF_to_target_graph_down, target_to_TF_graph_down = filter_down
         feature_mat_list_down = gen_feature_mat(diff_tab_down, target_to_TF_graph_down, weight_adj, DEGs_down, neg_genes_down, DEGs_TFs_down, neg_TFs_down)
     else:
-        feature_mat_list_down = None
+        feature_mat_list_down = [None,None,None]
 
     return(feature_mat_list_up,feature_mat_list_down)
