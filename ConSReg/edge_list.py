@@ -9,6 +9,7 @@ from networkx import DiGraph
 from rpy2.robjects import pandas2ri
 from pandas import read_csv
 from rpy2.robjects.packages import importr # This is for loading R library
+import pandas as pd 
 
 # import R libraries
 base = importr('base')
@@ -25,25 +26,31 @@ Process the peak table and use ChIPseeker R package to find
 nearest genes. Nearest genes were considered as target gene
 affected by the TF. TF ID is defined in the 'locusID' column
 """
-def edge_list_from_peak(peak_tab, gff_file, upTSS = 3000, downTSS = 500):
+def edge_list_from_peak(peak_tab, gff_file, up_tss = 3000, down_tss = 500, up_type = None, down_type = None):
     """
     Parameters
     ----------
-	peak_tab : pandas dataFrame. Table of peaks
-	
-    gff_file: string. File name of gff file
-	
-    upTSS : positions relative to upstream region of TSS
+    peak_tab : pandas dataFrame. Table of peaks
     
-    downTSS: positions relative to downstream region of TSS
+    gff_file: string. File name of gff file
+    
+    up_tss : positions relative to upstream region of TSS. This is used
+    for finding nearest gene for each binding site
+
+    down_tss: positions relative to downstream region of TSS. This is used
+    for finding nearest gene for each binding site
+
+    up_type: type of binding sites. None or 'intergenic'
+    down_type: type of binding sites. None or 'intron' or 'no_intron'. None includes all CREs and 'intron' includes only CREs in introns and 'no_intron' includes all CREs other than intron CREs.
     
     Returns
     -------
     el: pandas dataFrame. edge list of TF->target
-	"""
+    """
     pandas2ri.activate()
-    txdb = GF.makeTxDbFromGFF(gff_file)
-
+    txdb = GF.makeTxDbFromGFF(gff_file) 
+    peak_tab = peak_tab.reset_index(drop=True)
+    
     # Find the nearest genes for all peaks
     peaks = GR.GRanges(
           seqnames = S4V.Rle(base.unlist(peak_tab['chr'])),
@@ -53,35 +60,39 @@ def edge_list_from_peak(peak_tab, gff_file, upTSS = 3000, downTSS = 500):
         )
     
     # annotate peaks
-    anno_peak_tab = pandas2ri.ri2py(base.as_data_frame(meth.slot(CSK.annotatePeak(peaks,TxDb = txdb),"anno")))
-    
+    anno_priority = base.c("Intergenic","Intron","Exon","5UTR","3UTR","Downstream","Promoter")
+    anno_peak_tab = pandas2ri.ri2py(base.as_data_frame(meth.slot(CSK.annotatePeak(peaks,TxDb = txdb,genomicAnnotationPriority = anno_priority, level = "gene"),"anno")))
+    anno_peak_tab.reset_index(inplace=True, drop=True) # R object is 1-based. Make it 0-based here.
     '''
     Extract binding sites located in the upstream of the TSS of the nearest gene or 
-    binding sites located within upTSS bp to the upstream of the TSS of the nearest gene
+    binding sites located within up_tss bp to the upstream of the TSS of the nearest gene
     '''
-    if upTSS is "gene":
-        up_index = anno_peak_tab['distanceToTSS'] < 0
+    if up_type is None:
+        up_index = (anno_peak_tab['distanceToTSS'] < 0) & (anno_peak_tab['distanceToTSS'] > -up_tss)
     else:
-        up_index = anno_peak_tab['distanceToTSS'] > -upTSS
+        up_index = (anno_peak_tab['distanceToTSS'] < 0) & (anno_peak_tab['distanceToTSS'] > -up_tss) & pd.Series(pandas2ri.ri2py(base.grepl("Intergenic",anno_peak_tab['annotation'])),dtype = bool)
     
     '''
     Extract binding sites located in the first intron of nearest gene or
-    binding sites located within downTSS bp to the downstream of the TSS of the nearest genes
+    binding sites located within down_tss bp to the downstream of the TSS of the nearest genes
     '''
-    if downTSS is "intron":
-        down_index = base.grepl("intron 1 of",anno_peak_tab['annotation']
+    if down_type is None:
+        down_index = (anno_peak_tab['distanceToTSS'] >= 0) & (anno_peak_tab['distanceToTSS'] <= down_tss)
+    elif down_type is 'intron':
+        intron_index = pd.Series(pandas2ri.ri2py(base.grepl("Intron",anno_peak_tab['annotation'])),dtype = bool)
+        down_index = (anno_peak_tab['distanceToTSS'] >= 0) & (anno_peak_tab['distanceToTSS'] <= down_tss) & intron_index
     else:
-        down_index = anno_peak_tab['distanceToTSS'] <= downTSS
-     
-        #index = index1 & index2
-    index = up_index & down_index
-        #index = (anno_peak_tab['distanceToTSS'] > -upTSS) & (anno_peak_tab['distanceToTSS'] <= downTSS) 
+        no_intron_index = pd.Series(pandas2ri.ri2py(base.grep("Intron",anno_peak_tab['annotation'],invert = True)),dtype = bool)
+        down_index = (anno_peak_tab['distanceToTSS'] >= 0) & (anno_peak_tab['distanceToTSS'] <= down_tss) & no_intron_index
+
+    index = up_index | down_index
     
     # Make edge list
     el = anno_peak_tab.loc[index,('TFID','geneId')]
     el.columns = ('TFID','targetID')
-    el.index -= 1 # R starts the index with 1. To make it consistent with python, minus the index
-    return(el)
+    peak_tab = peak_tab.loc[index,:]
+    
+    return(el,peak_tab)
 
 # Convert edgelist dataframe to networkx directed graph object
 def edge_list_to_nx_graph(edge_list):
@@ -96,6 +107,6 @@ def edge_list_to_nx_graph(edge_list):
     
     target_to_TF_grap : networkx DiGraph object. Digraph object of target-> graph
 	"""
-    TF_to_target_graph = from_pandas_edgelist(df = edge_list,source = 'TFID',target = 'targetID', edge_attr = "count", create_using = DiGraph())
-    target_to_TF_graph = from_pandas_edgelist(df = edge_list,source = 'targetID',target = 'TFID', edge_attr = "count", create_using = DiGraph())
+    TF_to_target_graph = from_pandas_edgelist(df = edge_list,source = 'TFID',target = 'targetID', edge_attr = ["count","signalValue"], create_using = DiGraph())
+    target_to_TF_graph = from_pandas_edgelist(df = edge_list,source = 'targetID',target = 'TFID', edge_attr = ["count","signalValue"], create_using = DiGraph())
     return(TF_to_target_graph, target_to_TF_graph)
