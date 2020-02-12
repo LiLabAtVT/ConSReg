@@ -4,5 +4,5 @@ pandas==0.21.1
 joblib>=0.11
 rpy2==2.8.6
 networkx>=2
-scikit-learn>=0.19.1
+scikit-learn==0.19.1
 intervaltree==2.1.0

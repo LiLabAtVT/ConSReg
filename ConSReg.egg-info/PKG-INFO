@@ -1,12 +1,12 @@
 Metadata-Version: 2.1
 Name: ConSReg
-Version: 1.1.4
+Version: 1.1.5
 Summary: condition-specific regulation
 Home-page: https://github.com/LiLabAtVT/ConSReg
 Author: Qi Song
 Author-email: alexsong@vt.edu
 License: MIT
-Description: # ConSReg
+Description: # ConSReg 1.1.4
         [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
         Condition-specific regulations
         
@@ -135,6 +135,10 @@ Description: # ConSReg
         ```
         You may refer to https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html for more information about installation and usage of Anaconda.
         
+        Alternatively, you may want to install ConSReg in development mode to be able to edit the package by yourself. To do so, simply `git clone` this repository and then under the directory that contains `setup.py`, type in:
+        ```shell
+        pip install -e .
+        ```
         ## 2. Sample datasets
         Sample datasets can be found in `data` folder.
         
@@ -142,7 +146,7 @@ Description: # ConSReg
         We provide code for analyzing the sample datasets in two jupyter notebooks located in the root folder of this project: **bulk_analysis.ipynb** (for bulk RNA-seq data) and **single_cell_analysis.ipynb** (for single cell RNA-seq data).
         
         ## 4. Publication
-        ConSReg is currently in review at **Genome Research**. We will soon provide a pre-print version of our manuscript. 
+        ConSReg is currently under review.
         
         Qi Song, Jiyoung Lee, Shamima Akter, Ruth Grene, Song Li.  Accurate prediction of condition-specific regulatory maps in Arabidopsis using integrated genomic data (in review)
         

@@ -2,10 +2,10 @@ import pandas as pd
 import numpy as np
 import re
 import pickle
-
 from joblib import Parallel, delayed
 from collections import defaultdict,namedtuple
 from os import path
+from itertools import chain
 
 from ConSReg.comb_peak_files import comb_peak_files
 from ConSReg.peak_weight import get_weight
@@ -35,7 +35,7 @@ def load_obj(file_name):
         return(obj)
     
 '''
-Helper function
+Helper function for parallelization
 '''
 def parallel_eval(diff_name, diff_tab, feature_mat_up, feature_mat_down, feature_group, ml_engine, rep):
             
@@ -121,6 +121,7 @@ class ConSReg:
         self.__feature_group_generated = False
         self.__networks_generated = False
         self.__evaluated = False
+        self.__use_peak_signal = False
     
     '''
     Function to save current ConSReg object
@@ -134,7 +135,7 @@ class ConSReg:
     '''
     process the binding site data (DAP-seq)
     '''
-    def preprocess(self, dap_files, diff_files, atac_file,  gff_file, upTSS = 3000, downTSS = 500, verbose = True):
+    def preprocess(self, dap_files, diff_files, atac_file,  gff_file, dap_chr_col = 0, dap_chr_start_col = 1, dap_chr_end_col = 2, dap_strand_col = None, dap_signal_col = None, atac_chr_col = 0, atac_chr_start_col = 1, atac_chr_end_col = 2, atac_signal_col = None, up_tss = 3000, down_tss = 500, up_type = 'all', down_type = 'all', use_peak_signal = False, n_jobs = 1, verbose = True):
         '''
         Parameters
         ----------
@@ -144,13 +145,32 @@ class ConSReg:
         
         atac_file : string. File name of atac peak files (bed format). None if no atac-seq file is available
         gff_file : string. File name of genome annotation gff file
-
-        upTSS : positions relative to upstream region of TSS. This is used
+        
+        dap_chr_col: int: column number for dap-seq chromosome information, 0 indexed.
+        dap_chr_start_col: int, column number for dap-seq peak start position, 0 indexed.
+        dap_chr_end_col: int, column number for dap-seq peak end position, 0 indexed.
+        dap_strand_col: int/None, column number for dap-seq peak strand information, 0 indexed.
+        dap_signal_col: int/None, column number for dap-seq peak signal value, 0 indexed.
+        
+        atac_chr_col: column number for atac-seq chromosome information, 0 indexed.
+        atac_chr_start_col: column number for atac-seq peak start position, 0 indexed.
+        atac_chr_end_col: column number for atac-seq peak end position, 0 indexed.
+        atac_signal_col: column number for atac-seq peak signal value, 0 indexed.
+        
+        up_tss : positions relative to upstream region of TSS. This is used
         for finding nearest gene for each binding site
 
-        downTSS: positions relative to downstream region of TSS. This is used
+        down_tss: positions relative to downstream region of TSS. This is used
         for finding nearest gene for each binding site
-
+        
+        up_type: type of binding sites. 'all' or 'intergenic'
+        down_type: type of binding sites. 'all' or 'intron' or 'non_intron'
+        
+        use_peak_signal: True/False. Whether to use peak signal for ATAC-seq and DAP-seq?
+        use_atac_peak_signal: True/False. 
+        
+        n_jobs: int, number of jobs (for parallelization)
+        verbose: bool, whether to print out details?
         Returns
         -------
         self
@@ -161,20 +181,34 @@ class ConSReg:
             raise ValueError("Argument 'dap_file' should be a list")
         if type(diff_files) != list:
             raise ValueError("Argument 'diff_file' should be a list")
-        if type(atac_file) != str:
+        if type(atac_file) != str and atac_file is not None:
             raise ValueError("Argument 'atac_file' should be a string")
         if type(gff_file) != str:
             raise ValueError("Argument 'gff_file' should be a string")
         
-        # Check value of TSS positions
-        if type(upTSS) != int:
-            raise ValueError("Argument 'upTSS' should be an integer")
-        if type(downTSS) != int:
-            raise ValueError("Argument 'downTSS' should be an integer")
+        # Check column number of dap-seq and atac-seq
+        for name,param in zip(['dap_chr_col', 'dap_chr_start_col', 'dap_chr_end_col', 'atac_chr_col', 'atac_chr_start_col', 'atac_chr_end_col'],[dap_chr_col, dap_chr_start_col, dap_chr_end_col, atac_chr_col, atac_chr_start_col, atac_chr_end_col]):
+            if type(param) != int:
+                raise ValueError("Argument '"+ name +"' should be an integer")
+        for name,param in zip(['dap_strand_col','dap_signal_col','atac_signal_col'],[dap_strand_col,dap_signal_col,atac_signal_col]):
+            if param is not None and type(param) != int:
+                raise ValueError("Argument '"+ name +"' should be an integer or None")
+        
+        # Check value of TSS positions and binding site type
+        if type(up_tss) != int:
+            raise ValueError("Argument 'up_tss' should be an integer")
+        if type(down_tss) != int:
+            raise ValueError("Argument 'down_tss' should be an integer")
+        if up_type is not 'all' and up_type is not "intergenic":
+            raise ValueError("Argument 'up_type' should be 'all' or 'intergenic'")
+        if down_type not in ['all', 'intron', 'non_intron']:
+            raise ValueError("Argument 'down_type' should be 'all' or 'intron' or 'non_intron'")
         
         # Check 'verbose'
         if type(verbose) != bool:
-            raise ValueError("Argument 'verbose' should be a boolean variable")
+            raise ValueError("Argument 'verbose' should be a boolean variable (True/False)")
+        if type(use_peak_signal) != bool:
+            raise ValueError("Argument 'use_peak_signal' should be a boolean variable (True/False)")
         
         dap_files = check_file_list(dap_files)
         diff_files = check_file_list(diff_files)
@@ -185,10 +219,11 @@ class ConSReg:
         if len(diff_files) == 0:
             raise IOError("None of files specified in argument 'diff_files' exists")
             
-        if not path.exists(atac_file):
-            raise IOError(file_name + " does not exists")
+        if atac_file is not None:
+            if not path.exists(atac_file):
+                raise IOError(atac_file + " does not exists")
         if not path.exists(gff_file):
-            raise IOError(file_name + " does not exists")
+            raise IOError(gff_file + " does not exists")
         ################# End checking ################
                              
         if verbose:
@@ -197,33 +232,64 @@ class ConSReg:
         if self.__preprocess:
             print("Analysis aborted. There exists a preprocessed dataset.")
             return(self)
-            
+        
+        self.__use_peak_signal = use_peak_signal
+        
         # Merge DAP-seq peaks
-        peak_tab = comb_peak_files(dap_files)
+        peak_tab = comb_peak_files(dap_files, dap_chr_col = dap_chr_col, dap_chr_start_col = dap_chr_start_col, dap_chr_end_col = dap_chr_end_col, dap_strand_col = dap_strand_col, dap_signal_col = dap_signal_col)
 
         # TF->target edge list identified using peaks within the specified regions
-        el_anno = edge_list_from_peak(peak_tab,gff_file,upTSS = upTSS, downTSS = downTSS)
-
-        # This reduces the number of peaks to be calculated for weights. Use the peaks that have genes annotated within the specified region
-        # Note that repeated edges can exist because we want to keep all peaks for one TF->target interaction so as to overlap with all possible
-        # open chromatin regions
-        peak_tab = peak_tab.iloc[el_anno.index,]
-
-        # Generate edge list without repeated edges
-        el_nr = el_anno.groupby(el_anno.columns.tolist(), as_index = False).size()
-        el_nr = pd.DataFrame(el_nr.values, index = el_nr.index)
-        el_nr.reset_index(inplace = True)
-        el_nr.columns = ["TFID","targetID","count"]
+        if verbose:
+            print("Done")
+            print("Assigning CREs to nearest genes...")
+        
+        peak_tab_list = np.array_split(peak_tab, n_jobs)
+        results = Parallel(n_jobs = n_jobs)(delayed(edge_list_from_peak)(
+                                                tab,
+                                                gff_file,
+                                                up_tss = up_tss,
+                                                down_tss = down_tss,
+                                                up_type = up_type,
+                                                down_type = down_type
+                                                ) 
+                              for tab in peak_tab_list)
+        el_anno = pd.concat(map(lambda x: x[0],results,),axis = 0, ignore_index = True)
+        peak_tab = pd.concat(map(lambda x: x[1],results),axis = 0, ignore_index = True)
+        
+        # Add dap-seq signal values to edge list
+        el_anno = pd.concat([el_anno,peak_tab.loc[:,"signalValue"]],axis = 1)
+        
+        '''
+        Note that repeated edges can exist because we want to
+        keep all peaks for one TF->target interaction so as to 
+        overlap with all possible open chromatin regions
+        '''
+        # Generate edge list without repeated edges. 
+        peak_count = el_anno.groupby(['TFID','targetID'], as_index = False).size()
+        peak_sum = el_anno.groupby(['TFID','targetID'], as_index = False).sum()
+        peak_sum['count'] = peak_count.values
+        el_nr = peak_sum
         self.__dap_seq_el = el_nr.loc[:,["TFID","targetID"]]
 
         if verbose:
             print("Done")
-            print("Overlapping DAP-seq with ATAC-seq...")
+            print("Overlapping CREs with ATAC-seq...")
             
         # Compute the overlaps between DAP-seq and ATAC-seq. Use the results as weights
         if atac_file is not None:
-            weight = get_weight(peak_tab, atac_file)
-
+            peak_tab_list = np.array_split(peak_tab, n_jobs)
+            results = Parallel(n_jobs=n_jobs)(delayed(get_weight)(
+                                                tab,
+                                                atac_file,
+                                                atac_chr_col = atac_chr_col,
+                                                atac_chr_start_col = atac_chr_start_col,
+                                                atac_chr_end_col = atac_chr_end_col,
+                                                atac_signal_col = atac_signal_col,
+                                                use_peak_signal = use_peak_signal
+                                              )
+                                              for tab in peak_tab_list)
+            weight = list(chain(*results))
+            
             # Sum the weights for the same TF-target interaction
             weight_dict = defaultdict(int)
             for i,row in enumerate(el_anno.itertuples()):
@@ -285,7 +351,7 @@ class ConSReg:
         self._feature_mat_list_final = []
         
         for diff_tab in self.__diff_tab_list:
-            feature_mat_list_up,feature_mat_list_down = get_all_feature_mat(diff_tab, neg_type, self.__TF_to_target_graph, self.__target_to_TF_graph, self.__weight_adj)
+            feature_mat_list_up,feature_mat_list_down = get_all_feature_mat(diff_tab, neg_type, self.__TF_to_target_graph, self.__target_to_TF_graph, self.__weight_adj, self.__use_peak_signal)
             self._feature_mat_list_dap.append((feature_mat_list_up[0],feature_mat_list_down[0]))
             self._feature_mat_list_reweight.append((feature_mat_list_up[1],feature_mat_list_down[1]))
             self._feature_mat_list_final.append((feature_mat_list_up[2],feature_mat_list_down[2]))
@@ -314,7 +380,7 @@ class ConSReg:
         self
         '''
         if not self.__feature_dap_generated:
-            print("Analysis aborted. Feature matrices were generated yet.")
+            print("Analysis aborted. Feature matrices have not been generated yet.")
             
         comp_names = []
         ur_mat_list = []
@@ -338,7 +404,7 @@ class ConSReg:
         self
         '''
         if not self.__feature_reweighted_generated:
-            print("Analysis aborted. Feature matrices were generated yet.")
+            print("Analysis aborted. Feature matrices have not been generated yet.")
             
         comp_names = []
         ur_mat_list = []
@@ -362,7 +428,7 @@ class ConSReg:
         self
         '''
         if not self.__feature_final_generated:
-            print("Analysis aborted. Feature matrices were generated yet.")
+            print("Analysis aborted. Feature matrices have not been generated yet.")
             
         comp_names = []
         ur_mat_list = []

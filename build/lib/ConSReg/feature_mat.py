@@ -133,7 +133,7 @@ def filter(diff_tab, direction, neg_type, TF_to_target_graph, target_to_TF_graph
 '''
 Generate a single feature matrix
 '''
-def gen_feature_mat(diff_tab, target_to_TF_graph, weight_adj, DEGs, neg_genes, DEG_TFs, neg_TFs):
+def gen_feature_mat(diff_tab, target_to_TF_graph, weight_adj, DEGs, neg_genes, DEG_TFs, neg_TFs, use_peak_signal):
     '''
     Parameters
     ----------
@@ -159,11 +159,19 @@ def gen_feature_mat(diff_tab, target_to_TF_graph, weight_adj, DEGs, neg_genes, D
     row_genes = DEGs | neg_genes
     col_genes = DEG_TFs | neg_TFs # Make sure there are no duplicate TFs
     
-    # Generate the feature matrix by multiply subset of adj matrix and fold change column
+    '''
+    Generate the feature matrix by multiply subset of adj matrix and fold change column
+    When weight_adj is not None, weights are used (overlap from atac-seq and dap-seq peak signals are included).
+    Otherwise, only use the count of dap-seq peaks.
+    '''
     if weight_adj is not None:
         adj = weight_adj.loc[row_genes,col_genes]
     else:
-        adj = to_pandas_adjacency(Target2TFGraph.subgraph(row_genes | col_genes),weight = 'count').loc[row_genes,col_genes]
+        if use_peak_signal:
+            adj = to_pandas_adjacency(target_to_TF_graph.subgraph(row_genes | col_genes),weight = 'signalValue').loc[row_genes,col_genes]
+        else:
+            adj = to_pandas_adjacency(target_to_TF_graph.subgraph(row_genes | col_genes),weight = 'count').loc[row_genes,col_genes]
+    
     fc = diff_tab.loc[col_genes,'log2FoldChange']
     feature_mat_dap = adj.where(adj == 0, 1) 
     feature_mat_reweight = adj
@@ -185,7 +193,7 @@ def gen_feature_mat(diff_tab, target_to_TF_graph, weight_adj, DEGs, neg_genes, D
 '''
 Get up-regulated (UR) feature matrix and down-regulated (DR) feature matrix
 '''
-def get_all_feature_mat(diff_tab, neg_type, TF_to_target_graph, target_to_TF_graph, weight_adj):
+def get_all_feature_mat(diff_tab, neg_type, TF_to_target_graph, target_to_TF_graph, weight_adj, use_peak_signal):
     '''
     Parameters
     ----------
@@ -210,16 +218,16 @@ def get_all_feature_mat(diff_tab, neg_type, TF_to_target_graph, target_to_TF_gra
     
     if filter_up is not None:
         DEGs_up, neg_genes_up, DEGs_TFs_up, neg_TFs_up, diff_tab_up, TF_to_target_graph_up, target_to_TF_graph_up = filter_up
-        feature_mat_list_up = gen_feature_mat(diff_tab_up, target_to_TF_graph_up, weight_adj, DEGs_up, neg_genes_up, DEGs_TFs_up, neg_TFs_up)
+        feature_mat_list_up = gen_feature_mat(diff_tab_up, target_to_TF_graph_up, weight_adj, DEGs_up, neg_genes_up, DEGs_TFs_up, neg_TFs_up, use_peak_signal)
     else:
-        feature_mat_list_up = None
+        feature_mat_list_up = [None,None,None]
 
     filter_down = filter(diff_tab, "down", neg_type, TF_to_target_graph, target_to_TF_graph)
     
     if filter_down is not None:
         DEGs_down, neg_genes_down, DEGs_TFs_down, neg_TFs_down, diff_tab_down, TF_to_target_graph_down, target_to_TF_graph_down = filter_down
-        feature_mat_list_down = gen_feature_mat(diff_tab_down, target_to_TF_graph_down, weight_adj, DEGs_down, neg_genes_down, DEGs_TFs_down, neg_TFs_down)
+        feature_mat_list_down = gen_feature_mat(diff_tab_down, target_to_TF_graph_down, weight_adj, DEGs_down, neg_genes_down, DEGs_TFs_down, neg_TFs_down, use_peak_signal)
     else:
-        feature_mat_list_down = None
+        feature_mat_list_down = [None,None,None]
 
     return(feature_mat_list_up,feature_mat_list_down)
