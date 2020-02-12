@@ -127,6 +127,10 @@ pip install ConSReg --no-cache-dir
 ```
 You may refer to https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html for more information about installation and usage of Anaconda.
 
+Alternatively, you may want to install ConSReg in development mode to be able to edit the package by yourself. To do so, simply `git clone` this repository and then under the directory that contains `setup.py`, type in:
+```shell
+pip install -e .
+```
 ## 2. Sample datasets
 Sample datasets can be found in `data` folder.
 

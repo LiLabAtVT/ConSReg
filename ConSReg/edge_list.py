@@ -7,7 +7,6 @@ Functions for generate DAP-seq edge list and convert edge list
 from networkx.convert_matrix import from_pandas_edgelist # Using networkx 2.1
 from networkx import DiGraph
 from rpy2.robjects import pandas2ri
-from pandas import read_csv
 from rpy2.robjects.packages import importr # This is for loading R library
 import pandas as pd 
 
@@ -26,7 +25,7 @@ Process the peak table and use ChIPseeker R package to find
 nearest genes. Nearest genes were considered as target gene
 affected by the TF. TF ID is defined in the 'locusID' column
 """
-def edge_list_from_peak(peak_tab, gff_file, up_tss = 3000, down_tss = 500, up_type = None, down_type = None):
+def edge_list_from_peak(peak_tab, gff_file, up_tss, down_tss, up_type, down_type):
     """
     Parameters
     ----------
@@ -40,8 +39,8 @@ def edge_list_from_peak(peak_tab, gff_file, up_tss = 3000, down_tss = 500, up_ty
     down_tss: positions relative to downstream region of TSS. This is used
     for finding nearest gene for each binding site
 
-    up_type: type of binding sites. None or 'intergenic'
-    down_type: type of binding sites. None or 'intron' or 'no_intron'. None includes all CREs and 'intron' includes only CREs in introns and 'no_intron' includes all CREs other than intron CREs.
+    up_type: type of binding sites. 'all' or 'intergenic'
+    down_type: type of binding sites. 'all' or 'intron' or 'no_intron'. None includes all CREs and 'intron' includes only CREs in introns and 'no_intron' includes all CREs other than intron CREs.
     
     Returns
     -------
@@ -67,7 +66,7 @@ def edge_list_from_peak(peak_tab, gff_file, up_tss = 3000, down_tss = 500, up_ty
     Extract binding sites located in the upstream of the TSS of the nearest gene or 
     binding sites located within up_tss bp to the upstream of the TSS of the nearest gene
     '''
-    if up_type is None:
+    if up_type is 'all':
         up_index = (anno_peak_tab['distanceToTSS'] < 0) & (anno_peak_tab['distanceToTSS'] > -up_tss)
     else:
         up_index = (anno_peak_tab['distanceToTSS'] < 0) & (anno_peak_tab['distanceToTSS'] > -up_tss) & pd.Series(pandas2ri.ri2py(base.grepl("Intergenic",anno_peak_tab['annotation'])),dtype = bool)
@@ -76,7 +75,7 @@ def edge_list_from_peak(peak_tab, gff_file, up_tss = 3000, down_tss = 500, up_ty
     Extract binding sites located in the first intron of nearest gene or
     binding sites located within down_tss bp to the downstream of the TSS of the nearest genes
     '''
-    if down_type is None:
+    if down_type is 'all':
         down_index = (anno_peak_tab['distanceToTSS'] >= 0) & (anno_peak_tab['distanceToTSS'] <= down_tss)
     elif down_type is 'intron':
         intron_index = pd.Series(pandas2ri.ri2py(base.grepl("Intron",anno_peak_tab['annotation'])),dtype = bool)

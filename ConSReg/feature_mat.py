@@ -6,7 +6,6 @@ Functions for construcing feature matrix
 
 import pandas as pd
 import numpy as np
-import pdb # for debugging only
 from networkx.convert_matrix import to_pandas_adjacency
 from itertools import chain
 

@@ -35,7 +35,7 @@ def load_obj(file_name):
         return(obj)
     
 '''
-Helper function
+Helper function for parallelization
 '''
 def parallel_eval(diff_name, diff_tab, feature_mat_up, feature_mat_down, feature_group, ml_engine, rep):
             
@@ -135,7 +135,7 @@ class ConSReg:
     '''
     process the binding site data (DAP-seq)
     '''
-    def preprocess(self, dap_files, diff_files, atac_file,  gff_file, dap_chr_col = 0, dap_chr_start_col = 1, dap_chr_end_col = 2, dap_strand_col = None, dap_signal_col = None, atac_chr_col = 0, atac_chr_start_col = 1, atac_chr_end_col = 2, atac_signal_col = None, up_tss = 3000, down_tss = 500, up_type = None, down_type = None, use_peak_signal = False, n_jobs = 1, verbose = True):
+    def preprocess(self, dap_files, diff_files, atac_file,  gff_file, dap_chr_col = 0, dap_chr_start_col = 1, dap_chr_end_col = 2, dap_strand_col = None, dap_signal_col = None, atac_chr_col = 0, atac_chr_start_col = 1, atac_chr_end_col = 2, atac_signal_col = None, up_tss = 3000, down_tss = 500, up_type = 'all', down_type = 'all', use_peak_signal = False, n_jobs = 1, verbose = True):
         '''
         Parameters
         ----------
@@ -163,8 +163,8 @@ class ConSReg:
         down_tss: positions relative to downstream region of TSS. This is used
         for finding nearest gene for each binding site
         
-        up_type: type of binding sites. None or 'intergenic'
-        down_type: type of binding sites. None or 'intron' or 'non_intron'
+        up_type: type of binding sites. 'all' or 'intergenic'
+        down_type: type of binding sites. 'all' or 'intron' or 'non_intron'
         
         use_peak_signal: True/False. Whether to use peak signal for ATAC-seq and DAP-seq?
         use_atac_peak_signal: True/False. 
@@ -199,10 +199,10 @@ class ConSReg:
             raise ValueError("Argument 'up_tss' should be an integer")
         if type(down_tss) != int:
             raise ValueError("Argument 'down_tss' should be an integer")
-        if up_type is not None and up_type is not "intergenic":
-            raise ValueError("Argument 'up_type' should be None or 'intergenic'")
-        if down_type not in [None, 'intron', 'non_intron']:
-            raise ValueError("Argument 'down_type' should be None or 'intron' or 'non_intron'")
+        if up_type is not 'all' and up_type is not "intergenic":
+            raise ValueError("Argument 'up_type' should be 'all' or 'intergenic'")
+        if down_type not in ['all', 'intron', 'non_intron']:
+            raise ValueError("Argument 'down_type' should be 'all' or 'intron' or 'non_intron'")
         
         # Check 'verbose'
         if type(verbose) != bool:
@@ -380,7 +380,7 @@ class ConSReg:
         self
         '''
         if not self.__feature_dap_generated:
-            print("Analysis aborted. Feature matrices were generated yet.")
+            print("Analysis aborted. Feature matrices have not been generated yet.")
             
         comp_names = []
         ur_mat_list = []
@@ -404,7 +404,7 @@ class ConSReg:
         self
         '''
         if not self.__feature_reweighted_generated:
-            print("Analysis aborted. Feature matrices were generated yet.")
+            print("Analysis aborted. Feature matrices have not been generated yet.")
             
         comp_names = []
         ur_mat_list = []
@@ -428,7 +428,7 @@ class ConSReg:
         self
         '''
         if not self.__feature_final_generated:
-            print("Analysis aborted. Feature matrices were generated yet.")
+            print("Analysis aborted. Feature matrices have not been generated yet.")
             
         comp_names = []
         ur_mat_list = []

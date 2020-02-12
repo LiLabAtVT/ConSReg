@@ -5,9 +5,8 @@ Combine peaks files in a folder
 # Author: (Alex) Qi Song <alexsong@vt.edu>
 
 import re
-import pdb # Only for debugging
 import pandas as pd
-from numpy import array
+import numpy as np
 
 def comb_peak_files(peak_file_list, dap_chr_col, dap_chr_start_col, dap_chr_end_col, dap_strand_col, dap_signal_col):
     """
@@ -34,7 +33,7 @@ def comb_peak_files(peak_file_list, dap_chr_col, dap_chr_start_col, dap_chr_end_
         
         # Get TFID
         TFID = re.match(".*?([^/]*)\.narrowPeak$",peak_file).group(1)
-        TFID_col = pd.DataFrame(array([TFID]*peak_tab.shape[0]).reshape(peak_tab.shape[0],1))
+        TFID_col = pd.DataFrame(np.array([TFID]*peak_tab.shape[0]).reshape(peak_tab.shape[0],1))
         peak_tab = pd.concat([peak_tab,TFID_col],axis = 1)
         
         if dap_strand_col is not None:
