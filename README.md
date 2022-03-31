@@ -49,6 +49,7 @@ conda install -y r-base r-essentials
 conda install -y -c conda-forge r-gglasso r-rrf r-devtools
 pip install ConSReg
 ```
+Then ConSReg environment can be activated by `conda activate consreg` and disabled by `conda deactivate`
 ### 1.3 Manual installation (Skip this section if 1.2 is successful)
 ### 1.3.1 R installation
 #### install R
