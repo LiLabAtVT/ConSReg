@@ -1,6 +1,23 @@
 # ConSReg 1.1.4
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 Condition-specific regulations
+- [ConSReg 1.1.4](#consreg-114)
+- [Getting Started](#getting-started)
+  * [1. Installation](#1-installation)
+    + [1.1 Required packages](#11-required-packages)
+      - [1.1.1 Python](#111-python)
+      - [1.1.2 R](#112-r)
+    + [1.2 Easy installation by Anaconda (recommended)](#12-easy-installation-by-anaconda--recommended-)
+    + [1.3 Manual installation (Skip this section if 1.2 is successful)](#13-manual-installation--skip-this-section-if-12-is-successful-)
+    + [1.3.1 R installation](#131-r-installation)
+      - [install R](#install-r)
+      - [install R packages](#install-r-packages)
+    + [1.3.2 Python installation](#132-python-installation)
+  * [2. Sample datasets](#2-sample-datasets)
+  * [3. Analysis](#3-analysis)
+  * [4. Publication](#4-publication)
+
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
 # Getting Started
 ## 1. Installation
@@ -21,8 +38,20 @@ Condition-specific regulations
 - gglasso == 1.4
 - RRF == 1.9
 - R >= 3.5.1
-### 1.2 R installation
-#### 1.2.1 install R
+### 1.2 Easy installation by Anaconda (recommended)
+Since ConSReg is dependent on both Python and R packages, we recommend installing ConSReg by Anaconda to easily set up the running environment. You may retrive Anaconda from [here](https://www.anaconda.com/) and install the version corresponding to your OS.  
+Once Anaconda is installed in your OS, run the following commands to create an new environment and install ConSReg and all its dependencies into the new environment:
+```bash
+conda create -y -n consreg python=3.6 # The new environment name is 'consreg'. You may use other name instead.
+conda activate consreg
+conda install -y -c bioconda bioconductor-chipseeker
+conda install -y r-base r-essentials
+conda install -y -c conda-forge r-gglasso r-rrf r-devtools
+pip install ConSReg
+```
+### 1.3 Manual installation (Skip this section if 1.2 is successful)
+### 1.3.1 R installation
+#### install R
 If R is not already installed， you may follow these steps to build R from source code. Otherwise, you may skip this section and start from 1.2.2
 
 First, disable any conda environment, if there is an active one.
@@ -64,7 +93,7 @@ Apply the changes to environment variables `PATH` and `LD_LIBRARY_PATH`:
 ```shell
 source ~/.bashrc
 ```
-#### 1.2.2 install R packages
+#### install R packages
 ConSReg requires several R packages: `ChIPseeker`, `CoReg`, `gglasso` and `RRF`.
 
 It is recommended to deactivate any conda environment when installing R packages, as it may add the environment-specific path which may fail the installation. If any conda environment is active, you may deactivate it by:
@@ -105,18 +134,8 @@ To install `RRF` package from CRAN, type the following commands in R environment
 install.pacakges("RRF")
 ```
 Please refer to the link [here](https://cran.r-project.org/web/packages/RRF/index.html) for more details.
-### 1.3 Python installation
-We recommend the users to create a new Python environment for ConSReg using Anaconda and install ConSReg in this environment. This can guarantee ConSReg work with correct dependencies. However, installing ConSReg without conda environment is also welcome.
-
-To create a new environment using conda:
-```shell
-conda create --name consreg python=3.6
-```
-Activate the new environment
-```shell
-conda activate consreg
-```
-Then ConSReg can be then installed using pip:
+### 1.3.2 Python installation
+ConSReg can be installed by pip:
 ```shell
 pip install ConSReg
 ```
@@ -125,7 +144,6 @@ Sometime rpy2 may throw out error message when imported in Python. This problem 
 ```shell
 pip install ConSReg --no-cache-dir
 ```
-You may refer to https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html for more information about installation and usage of Anaconda.
 
 Alternatively, you may want to install ConSReg in development mode to be able to edit the package by yourself. To do so, simply `git clone` this repository and then under the directory that contains `setup.py`, type in:
 ```shell
@@ -138,6 +156,5 @@ Sample datasets can be found in `data` folder.
 We provide code for analyzing the sample datasets in two jupyter notebooks located in the root folder of this project: **bulk_analysis.ipynb** (for bulk RNA-seq data) and **single_cell_analysis.ipynb** (for single cell RNA-seq data).
 
 ## 4. Publication
-ConSReg is currently under review.
-
-Qi Song, Jiyoung Lee, Shamima Akter, Ruth Grene, Song Li.  Accurate prediction of condition-specific regulatory maps in Arabidopsis using integrated genomic data (in review)
+Please cite the followint paper if you use ConSReg in your research:  
+Qi Song, Jiyoung Lee, Shamima Akter, Ruth Grene, Song Li. "Prediction of condition-specific regulatory genes using machine learning." Nucleic acids research 48.11 (2020): e62-e62.
