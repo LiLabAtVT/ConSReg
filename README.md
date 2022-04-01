@@ -44,9 +44,9 @@ Once Anaconda is installed in your OS, run the following commands to create an n
 ```bash
 conda create -y -n consreg python=3.6 # The new environment name is 'consreg'. You may use other name instead.
 conda activate consreg
-conda install -y -c bioconda bioconductor-chipseeker
-conda install -y r-base r-essentials
-conda install -y -c conda-forge r-gglasso r-rrf r-devtools
+conda install -y -c bioconda --no-channel-priority bioconductor-chipseeker
+conda install -y --no-channel-priority r-base r-essentials
+conda install -y --no-channel-priority -c conda-forge r-gglasso r-rrf r-devtools
 pip install ConSReg
 ```
 Then ConSReg environment can be activated by `conda activate consreg` and disabled by `conda deactivate`
