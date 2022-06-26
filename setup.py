@@ -17,7 +17,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=[
         #'numpy==1.16.2',
-        'numpy==1.19',
+        'numpy==1.22.0',
 	'scipy==1.1.0',
         'pandas==0.21.1',
         'joblib>=0.11',
