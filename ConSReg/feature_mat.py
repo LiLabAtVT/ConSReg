@@ -70,8 +70,8 @@ def filter(diff_tab, direction, neg_type, TF_to_target_graph, target_to_TF_graph
 
     # Filter the genes by FC and p-values, get up DEGs, down DEGs and negative genes.
     if direction == "up":
+        
         DEGs = set(diff_tab.loc[(diff_tab.loc[:,"padj"] < 0.05) & (diff_tab.loc[:,"log2FoldChange"] > 0),].index)
-
         if neg_type == "udg":
             neg_genes = diff_tab.loc[(diff_tab.loc[:,"baseMean"] == 0),].index
             diff_tab.loc[neg_genes,"log2FoldChange"] = 1

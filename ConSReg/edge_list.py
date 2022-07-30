@@ -9,6 +9,7 @@ from networkx import DiGraph
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.packages import importr # This is for loading R library
 import pandas as pd 
+import numpy as np
 
 # import R libraries
 base = importr('base')
@@ -49,19 +50,31 @@ def edge_list_from_peak(peak_tab, gff_file, up_tss, down_tss, up_type, down_type
     pandas2ri.activate()
     txdb = GF.makeTxDbFromGFF(gff_file) 
     peak_tab = peak_tab.reset_index(drop=True)
+
+    # Assign each peak a numeric ID so that we can keep track of each peak.
+    peak_tab['peak_id'] = np.arange(peak_tab.shape[0])
     
     # Find the nearest genes for all peaks
     peaks = GR.GRanges(
           seqnames = S4V.Rle(base.unlist(peak_tab['chr'])),
           ranges = IR.IRanges(base.unlist(peak_tab['chrStart']),base.unlist(peak_tab['chrEnd'])),
           strand = S4V.Rle(BG.strand(base.gsub('\\.','*',base.unlist(peak_tab['strand'])))),
-          TFID = base.unlist(peak_tab['TFID'])
+          TFID = base.unlist(peak_tab['TFID']),
+          peak_id = base.unlist(peak_tab['peak_id'])
         )
     
     # annotate peaks
     anno_priority = base.c("Intergenic","Intron","Exon","5UTR","3UTR","Downstream","Promoter")
     anno_peak_tab = pandas2ri.ri2py(base.as_data_frame(meth.slot(CSK.annotatePeak(peaks,TxDb = txdb,genomicAnnotationPriority = anno_priority, level = "gene"),"anno")))
     anno_peak_tab.reset_index(inplace=True, drop=True) # R object is 1-based. Make it 0-based here.
+
+    # Subset the peak_tab (some peaks might be removed by chipseeker)
+    peak_tab = peak_tab.merge(
+            anno_peak_tab.loc[:,['peak_id']],
+                    how = "right",
+                    on = "peak_id"
+                )
+
     '''
     Extract binding sites located in the upstream of the TSS of the nearest gene or 
     binding sites located within up_tss bp to the upstream of the TSS of the nearest gene
