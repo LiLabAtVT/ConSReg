@@ -1,4 +1,4 @@
-# ConSReg 1.1.4
+# ConSReg 1.1.7
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 Condition-specific regulations
 - [ConSReg 1.1.4](#consreg-114)
@@ -153,7 +153,15 @@ pip install -e .
 ## 2. Sample datasets
 Sample datasets can be found in `data` folder.
 
-## 3. Analysis
+## 3. Input files and format
+ConSReg can take three types of genomic data as inputs:
+1. Open chromatin position information from ATAC-seq data, represented as a bed file, which should include three columns: Column1 represents chromosome name (e.g, chr1, chr2); Column2 represents start position of an open chromatin region; Column3 represents end position of an open chromatin region (See also the sample data files under `data/atac_seq_all_peaks` in this repository)
+
+2. TF binding location information from DAP-seq/ChIP-seq data, represented as narrowPeak files, which should contain the same types of columns stated for ATAC-seq data (See also the sample data files under `data/dap_seq_all_peaks` in this repository). Note that the binding information for different TFs should be in separate files and each file is named by the name of the corresponding TF. For example, file “AT1G01060.narrowPeak” contains only the TF binding locations for the TF “AT1G01060”.
+
+3. Differentially expressed gene (DEG) information from RNA-seq/microarray data, represented as **comma-separated values (CSV) table files**, which should contain four columns: The **first column** represents gene name; a column named **“baseMean”** that represents mean expression for the gene; a column named **“log2FoldChange”** that represents log2-scaled fold change; a column named **“padj”** that represents the adjusted p-values from statistical test for differential expressions. This type of DEG information usually could be generated from DESeq2 package (See DESeq2 page for more information: https://bioconductor.org/packages/release/bioc/html/DESeq2.html). ConSReg can take multiple DEG tables as inputs and each table corresponds to a DEG analysis from one experiment.
+
+## 4. Analysis
 We provide code for analyzing the sample datasets in two jupyter notebooks located in the root folder of this project: **bulk_analysis.ipynb** (for bulk RNA-seq data) and **single_cell_analysis.ipynb** (for single cell RNA-seq data).
 
 ## 4. Publication
