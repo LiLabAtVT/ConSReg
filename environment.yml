@@ -119,7 +119,6 @@ dependencies:
   - pango=1.50.8=hc4f8a73_1
   - pcre=8.45=h9c3ff4c_0
   - pcre2=10.37=h032f7d1_0
-  - pip=21.2.4=pyhd8ed1ab_0
   - pixman=0.40.0=h36c2ea0_0
   - python=3.6.15=hb7a2778_0_cpython
   - python_abi=3.6=2_cp36m
@@ -319,18 +318,49 @@ dependencies:
   - zlib=1.2.12=h166bdaf_2
   - zstd=1.5.2=h8a70e8d_2
   - pip:
-    - consreg==1.1.6
+    - bleach==4.1.0
+    - build==0.8.0
+    - cffi==1.15.1
+    - charset-normalizer==2.0.12
+    - colorama==0.4.5
+    - consreg==1.1.7
+    - cryptography==37.0.4
     - decorator==4.4.2
+    - docutils==0.18.1
+    - idna==3.3
+    - importlib-metadata==4.8.3
+    - importlib-resources==5.4.0
     - intervaltree==2.1.0
+    - jeepney==0.7.1
     - joblib==1.1.0
+    - keyring==23.4.1
     - networkx==2.5.1
     - numpy==1.19.0
+    - packaging==21.3
     - pandas==0.21.1
+    - pep517==0.13.0
+    - pip==21.3.1
+    - pkginfo==1.8.3
+    - pycparser==2.21
+    - pygments==2.12.0
+    - pyparsing==3.0.9
     - python-dateutil==2.8.2
     - pytz==2022.1
+    - readme-renderer==34.0
+    - requests==2.27.1
+    - requests-toolbelt==0.9.1
+    - rfc3986==1.5.0
     - rpy2==2.8.6
     - scikit-learn==0.19.1
     - scipy==1.1.0
+    - secretstorage==3.3.2
     - six==1.16.0
     - sortedcontainers==2.4.0
+    - tomli==1.2.3
+    - tqdm==4.64.0
+    - twine==3.8.0
+    - typing-extensions==4.1.1
+    - urllib3==1.26.11
+    - webencodings==0.5.1
+    - zipp==3.6.0
 prefix: /jet/home/qsong/.conda/envs/consreg
