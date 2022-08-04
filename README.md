@@ -85,6 +85,7 @@ Alternatively, you may run jupyter notebook inside the container:
 ```bash
 singularity run consreg_singularity_ubuntu20.04_latest.sif jupyter notebook
 ```
+Additonally, we provide the singularity definination file (**consreg_singularity.def**) in this repository for rebuilding the container for ConSReg. You may rebuild the container by yourself and add other packages you want.
 #### 1.3.4 Manual installation for all dependencies
 If all of the above steps fail, you may manually install all dependencies by following the steps below.
 ##### install R
