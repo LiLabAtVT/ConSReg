@@ -10,7 +10,7 @@ Condition-specific regulations
     + [1.3 Installation instructions](#13-installation-instructions)
       - [1.3.1 installing ConSReg by Anaconda (with environment.yml)](#131-installing-consreg-by-anaconda--with-environmentyml-)
       - [1.3.2 installing ConSReg by Aanconda (manual installation)](#132-installing-consreg-by-aanconda--manual-installation-)
-      - [1.3.3 singularity image](#133-singularity-image)
+      - [1.3.3 installing ConSReg by singularity image](#133-installing-ConSReg-by-singularity-image)
       - [1.3.4 Manual installation for all dependencies](#134-manual-installation-for-all-dependencies)
         * [install R](#install-r)
         * [install R packages](#install-r-packages)
@@ -71,7 +71,7 @@ conda install -y --no-channel-priority -c conda-forge r-gglasso r-rrf r-devtools
 pip install ConSReg
 ```
 Then ConSReg environment can be activated by `conda activate consreg` and disabled by `conda deactivate`
-#### 1.3.3 singularity image
+#### 1.3.3 installing ConSReg by singularity image
 Singularity is a container system which creasts lightweight container that hosts all system dependencies and environment for a given software package. Users may simply pull container image from the cloud and then run the program inside the container without having to installing it in their own machines. You may install Singularity following the instructions [here](https://docs.sylabs.io/guides/3.5/user-guide/quick_start.html).  
 To install ConSReg using Singularity, you may simply pull our prebuilt singularity image for ConSReg：
 ```bash
