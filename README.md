@@ -8,9 +8,9 @@ Condition-specific regulations
       - [1.1.2 R](#112-r)
     + [1.2 Installation choices](#12-installation-choices)
     + [1.3 Installation instructions](#13-installation-instructions)
-      - [1.3.1 installing ConSReg by Anaconda (with environment.yml)](#131-installing-consreg-by-anaconda--with-environmentyml-)
-      - [1.3.2 installing ConSReg by Aanconda (manual installation)](#132-installing-consreg-by-aanconda--manual-installation-)
-      - [1.3.3 installing ConSReg by singularity image](#133-installing-ConSReg-by-singularity-image)
+      - [1.3.1 install ConSReg by Anaconda (with environment.yml)](#131-install-consreg-by-anaconda--with-environmentyml-)
+      - [1.3.2 install ConSReg by Aanconda (manual installation)](#132-install-consreg-by-aanconda--manual-installation-)
+      - [1.3.3 install ConSReg by singularity image](#133-install-ConSReg-by-singularity-image)
       - [1.3.4 Manual installation for all dependencies](#134-manual-installation-for-all-dependencies)
         * [install R](#install-r)
         * [install R packages](#install-r-packages)
@@ -43,13 +43,13 @@ Condition-specific regulations
 - R >= 3.5.1
 ### 1.2 Installation choices
 We provide four ways to install ConSReg and its dependencies:
-1. installing ConSReg by Anaconda (with environment.yml)
+1. install ConSReg by Anaconda (with environment.yml)
 2. install ConSReg by Anaconda (manual installation)
 3. singularity image
 4. manual installation for all dependecies
 Users only need to choose one of them that works. We would suggest to starting with `1` or `3`, as these two options are very easy and straightforward.
 ### 1.3 Installation instructions
-#### 1.3.1 installing ConSReg by Anaconda (with environment.yml)
+#### 1.3.1 install ConSReg by Anaconda (with environment.yml)
 Since ConSReg is dependent on both Python and R packages, we recommend installing ConSReg by Anaconda to easily set up the running environment. You may retrive Anaconda from [here](https://www.anaconda.com/) and install the version corresponding to your OS.   
 Once Anaconda is installed in your os, create a new conda environment using the [`environment.yml`](https://raw.githubusercontent.com/LiLabAtVT/ConSReg/master/environment.yml) file in this repository:
 ```shell
@@ -60,7 +60,7 @@ Alternatively, you can type in
 conda env create -f https://raw.githubusercontent.com/LiLabAtVT/ConSReg/master/environment.yml
 ```
 This will create a new conda environment named `consreg` which contains `ConSReg` package and all its dependecies. You can then type in `conda activate consreg` to activate this environment or `conda deactivate` to deactivate this environment. For more information, please refer to official documentation of Ananconda.
-#### 1.3.2 installing ConSReg by Aanconda (manual installation)
+#### 1.3.2 install ConSReg by Aanconda (manual installation)
 Alternatively, after Anaconda is installed in your OS (see **1.3.1**), run the following commands to create an new environment and install ConSReg and all its dependencies into the new environment:
 ```bash
 conda create -y -n consreg python=3.6 # The new environment name is 'consreg'. You may use other name instead.
@@ -71,7 +71,7 @@ conda install -y --no-channel-priority -c conda-forge r-gglasso r-rrf r-devtools
 pip install ConSReg
 ```
 Then ConSReg environment can be activated by `conda activate consreg` and disabled by `conda deactivate`
-#### 1.3.3 installing ConSReg by singularity image
+#### 1.3.3 install ConSReg by singularity image
 Singularity is a container system which creasts lightweight container that hosts all system dependencies and environment for a given software package. Users may simply pull container image from the cloud and then run the program inside the container without having to installing it in their own machines. You may install Singularity following the instructions [here](https://docs.sylabs.io/guides/3.5/user-guide/quick_start.html).  
 To install ConSReg using Singularity, you may simply pull our prebuilt singularity image for ConSReg：
 ```bash
