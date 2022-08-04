@@ -75,15 +75,15 @@ Then ConSReg environment can be activated by `conda activate consreg` and disabl
 Singularity is a container system which creasts lightweight container that hosts all system dependencies and environment for a given software package. Users may simply pull container image from the cloud and then run the program inside the container without having to installing it in their own machines. You may install Singularity following the instructions [here](https://docs.sylabs.io/guides/3.5/user-guide/quick_start.html).  
 To install ConSReg using Singularity, you may simply pull our prebuilt singularity image for ConSReg：
 ```bash
-singularity pull -U library://alexsong0374/consreg/consreg_singularity_ubuntu20.04
+singularity pull -U library://alexsong0374/consreg/consreg_ubuntu20.04
 ```
-This will create an image file called "consreg_singularity_ubuntu20.04_latest.sif" locally. To run python environment with ConSReg installed, you may run the local container by:
+This will create an image file called "consreg_ubuntu20.04_latest.sif" locally. To run python environment with ConSReg installed, you may run the local container by:
 ```bash
-singularity run consreg_singularity_ubuntu20.04_latest.sif python3
+singularity run consreg_ubuntu20.04_latest.sif python3
 ```
 Alternatively, you may run jupyter notebook inside the container:
 ```bash
-singularity run consreg_singularity_ubuntu20.04_latest.sif jupyter notebook
+singularity run consreg_ubuntu20.04_latest.sif jupyter notebook
 ```
 Additonally, we provide the singularity definination file (**consreg_singularity.def**) in this repository for rebuilding the container for ConSReg. You may rebuild the container by yourself and add other packages you want.
 #### 1.3.4 Manual installation for all dependencies
